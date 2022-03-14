@@ -23,8 +23,6 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
 @Entity
-@SecondaryTable(name = "status_whatsapp", pkJoinColumns = 
-{ @PrimaryKeyJoinColumn(name = "id") })
 public class DataFile {
 	
 	@Id@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,11 +45,6 @@ public class DataFile {
 	@ManyToOne
 	private Promoter promoter;
 	private Project project;
-	@Column(table = "status_whatsapp", name = "sendPhoto")
-	private Boolean sendPhoto;
-	@Column(table = "status_whatsapp", name = "sendDetail")
-	private Boolean sendDetail;
-	
 	public DataFile() {
 		photos = new ArrayList<Photo>();
 		this.data = LocalDate.now();
@@ -66,18 +59,7 @@ public class DataFile {
 		this.data =  datafile.getData();
 		this.detailProducts = datafile.getDetail_Products();
 	}
-	public boolean isSendPhoto() {
-		return sendPhoto;
-	}
-	public void setSendPhoto(boolean sendPhoto) {
-		this.sendPhoto = sendPhoto;
-	}
-	public boolean isSendDetail() {
-		return sendDetail;
-	}
-	public void setSendDetail(boolean sendDetail) {
-		this.sendDetail = sendDetail;
-	}
+	
 	public List<DetailProduct> getDetail_Products() {
 		return detailProducts;
 	}

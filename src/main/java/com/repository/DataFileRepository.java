@@ -13,6 +13,7 @@ import org.hibernate.SessionFactory;
 
 import com.model.DataFile;
 import com.model.DetailProduct;
+import com.model.SendStatus;
 import com.util.HibernateUtil;
 import com.util.Status;
 
@@ -20,12 +21,9 @@ public class DataFileRepository {
 
 	public SessionFactory sessionFactory;
 	public Session session;
-	public Class persistedClass;
-
 	public List<DataFile> lista;
 
 	public DataFileRepository() {
-		this.persistedClass = DataFile.class;
 		this.sessionFactory = new HibernateUtil().getSessionFactory();
 	}
 
@@ -50,7 +48,6 @@ public class DataFileRepository {
 	}
 
 	// Verifica se existe datafile do dia
-
 	public boolean checkDataFile(DataFile dataFile) {
 		String hql = "select 1 from DataFile d where d.shop.id=:idLoja and d.data=:dataHoje";
 		try {
@@ -70,7 +67,7 @@ public class DataFileRepository {
 		// TODO Auto-generated method stub
 		session = this.sessionFactory.getCurrentSession();
 		session.beginTransaction();
-		String hql = "select d from DataFile d where d.data=:dataHoje and d.brand.id=:idBrand";
+		String hql = "select d from DataFile d where d.data=:dataHoje and d.brand.id=:idBrand and d.id not in (select s.id from SendStatus s)";
 		try {
 			Query query = session.createQuery(hql, DataFile.class);
 			query.setParameter("dataHoje", LocalDate.now());
@@ -83,7 +80,7 @@ public class DataFileRepository {
 			session.getTransaction().commit();
 		}
 	}
-
+	
 	public List<DetailProduct> checkLastSentDetails(DataFile dataFile, int diferenceDays) {
 		session = this.sessionFactory.getCurrentSession();
 		session.beginTransaction();
@@ -119,30 +116,16 @@ public class DataFileRepository {
 		Query query = session.createQuery(hql);
 		return query.getResultList();
 	}
-
-	public void delete(Long id) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public long countAll() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public List<DataFile> findAll() {
+	
+	public void updateStatus(DataFile dataFile) {
 		session = this.sessionFactory.getCurrentSession();
 		session.beginTransaction();
-		String hql = "select d from DataFile d";
-		try {
-			Query query = session.createQuery(hql, DataFile.class);
-			return query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			session.getTransaction().commit();
-		}
+		SendStatus sendStatus = new SendStatus();
+		sendStatus.setDatafile(dataFile);
+		sendStatus.setSendPhoto(true);
+		sendStatus.setSendDetail(true);
+		session.save(sendStatus);
+		session.getTransaction().commit();
 	}
 
 }

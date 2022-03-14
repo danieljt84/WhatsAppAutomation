@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.model.DataFile;
 import com.model.DetailProduct;
 import com.util.DriverFactory;
+import com.util.Status;
 
 public class WhatsappService extends DriverFactory {
 
@@ -63,7 +64,10 @@ public class WhatsappService extends DriverFactory {
 
 	}
     //Envio as informacaos dos promotores que fizeram o envio das fotos e relatï¿½rio
-	public void sendInfo(DataFile datafile) {
+	//Se retorno igual a verdadeiro, as informações foram enviadas completas
+	//Se retorno igual a falso, foi enviado apenas as fotos
+	public Status sendInfo(DataFile datafile) {
+		Status status;
 		try {
 			// checkLastImageSend();
 			Thread.sleep(2000);
@@ -72,15 +76,17 @@ public class WhatsappService extends DriverFactory {
 			element.sendKeys("*" + datafile.getShop() + "*");
 			element.sendKeys(Keys.CONTROL, Keys.ENTER);
 			sendNumberAndName(datafile.getPromoter().getNumber(), datafile.getPromoter().getName(), element);
-			checkDetail(datafile.getShop().getName(),datafile.getDetail_Products(), element);
+			status = (checkDetail(datafile, element) ? Status.COMPLETE : Status.ONLY_PHOTOS);
 			Thread.sleep(2000);
 			element.sendKeys(Keys.ENTER);
+			return status;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	public void sendNumberAndName(String number, String name, WebElement element) {
@@ -107,11 +113,12 @@ public class WhatsappService extends DriverFactory {
 	}
 
 	// Verifico se tem alguma pesquisa relacionado a loja e se esta na data certa
-	public void checkDetail(String shop, List<DetailProduct> details, WebElement element) {
-		if (details != null) {
+	public boolean checkDetail(DataFile datafile, WebElement element) {
+		boolean _return = false;
+		if (datafile.getDetail_Products() != null) {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			element.sendKeys(Keys.CONTROL, Keys.ENTER);
-			for (DetailProduct detail_Product : details) {
+			for (DetailProduct detail_Product : datafile.getDetail_Products()) {
 				if (detail_Product.getRuptura().contains("NÃƒO")) {
 					element.sendKeys(Keys.CONTROL, Keys.ENTER);
 					element.sendKeys(detail_Product.getProduct().getName());
@@ -147,6 +154,8 @@ public class WhatsappService extends DriverFactory {
 					}
 				}
 			}
+			_return = true;
 		}
+		return _return;
 	}
 }

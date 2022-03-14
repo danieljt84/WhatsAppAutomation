@@ -22,5 +22,6 @@
                 <mapping class="com.model.Photo"></mapping>
                 <mapping class="com.model.DetailProduct"></mapping>
                 <mapping class="com.model.WhatsappGroup"></mapping>
+                <mapping class="com.model.SendStatus"></mapping>
     </session-factory>
 </hibernate-configuration>

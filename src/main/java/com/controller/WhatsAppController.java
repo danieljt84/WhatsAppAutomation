@@ -80,7 +80,7 @@ public class WhatsAppController {
 				whatsapp.findContact("Eu vivo");
 				for (DataFile file : files) {
 					int cont = 0;
-					file.setDetail_Products(dataFileRepository.checkLastSentDetails(file, 1));
+					file.setDetail_Products(dataFileRepository.checkLastSentDetails(file, 2));
 					try {
 						for (Photo photo : file.getPhotos()) {
 							if (whatsapp.sendImage(photo.getUrl()))
@@ -88,7 +88,7 @@ public class WhatsAppController {
 						}
 						if (cont > 0) {
 							whatsapp.sendInfo(file);
-							//dataFileRepository.updateStatusDatas(file);
+							dataFileRepository.updateStatus(file);
 						}
 					} catch (Exception e) {
 						continue;

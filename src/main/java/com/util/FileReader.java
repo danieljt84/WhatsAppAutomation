@@ -92,7 +92,7 @@ public class FileReader {
 	}
 	
 	public List<File> getMatches() {
-		matches = dir.listFiles(new FilenameFilter() {
+		matches = new File(System.getenv("PATHFOTO")).listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".png");
 			}
