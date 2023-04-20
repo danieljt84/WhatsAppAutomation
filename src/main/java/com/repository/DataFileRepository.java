@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.Query;
 import javax.transaction.Transactional;
@@ -49,11 +50,12 @@ public class DataFileRepository {
 
 	// Verifica se existe datafile do dia
 	public boolean checkDataFile(DataFile dataFile) {
-		String hql = "select 1 from DataFile d where d.shop.id=:idLoja and d.data=:dataHoje";
+		String hql = "select 1 from DataFile d where d.shop.id=:idLoja and d.data=:dataHoje and d.brand.id=:idBrand";
 		try {
 			Query query = session.createQuery(hql);
 			query.setParameter("idLoja", dataFile.getShop().getId());
 			query.setParameter("dataHoje", LocalDate.now());
+			query.setParameter("idBrand", dataFile.getBrand().getId());
 			query.getSingleResult();
 			return true;
 		} catch (Exception e) {
@@ -62,7 +64,6 @@ public class DataFileRepository {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Transactional()
 	public List<DataFile> findByBrand(long idBrand) {
 		// TODO Auto-generated method stub
 		session = this.sessionFactory.getCurrentSession();
@@ -80,33 +81,46 @@ public class DataFileRepository {
 			session.getTransaction().commit();
 		}
 	}
-	
-	public List<DetailProduct> checkLastSentDetails(DataFile dataFile, int diferenceDays) {
+
+	public List<DetailProduct> checkLastSentDetails(DataFile dataFile, Integer diferenceDays) {
 		session = this.sessionFactory.getCurrentSession();
 		session.beginTransaction();
+		int days;
 		try {
-			Period period = Period.between(getLastData(dataFile), LocalDate.now()); 
-			int days = period.getDays();
-			if(days > diferenceDays){ 
-				 dataFile = session.find(DataFile.class, dataFile.getId());
-				 return dataFile.getDetail_Products();
+			Period period = Period.between(getLastData(dataFile), LocalDate.now());
+			days = period.getDays();
+		} catch (Exception e) {
+			days = 2;
+		}
+		try {
+			if (days >= diferenceDays) {
+				Thread.sleep(1000);
+				dataFile = session.find(DataFile.class, dataFile.getId());
+				Thread.sleep(1000);
+				dataFile.getDetailProducts();
+				return dataFile.getDetailProducts();
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
-		}finally {
+		} finally {
 			session.getTransaction().commit();
 		}
 		return null;
 	}
 
 	public LocalDate getLastData(DataFile dataFile) {
-		String hql = "select max(d.data) from DataFile d" + " where d.shop.id = :idShop";
+		String hql = "select max(d.data) from DataFile d where d.shop.id = :idShop"
+				+ " and (select 1 from SendStatus s where s.id = d.id and s.sendDetail = true) = 1";
 		Query query = session.createQuery(hql);
 		// query.setParameter("dataHoje", LocalDate.now());
 		// query.setParameter("diferenceDays", diferenceDays);
 		query.setParameter("idShop", dataFile.getShop().getId());
-		return (LocalDate) query.getSingleResult();
+		try {
+			return (LocalDate) query.getSingleResult();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public List<DetailProduct> getList() {
@@ -116,16 +130,25 @@ public class DataFileRepository {
 		Query query = session.createQuery(hql);
 		return query.getResultList();
 	}
-	
-	public void updateStatus(DataFile dataFile) {
-		session = this.sessionFactory.getCurrentSession();
-		session.beginTransaction();
-		SendStatus sendStatus = new SendStatus();
-		sendStatus.setDatafile(dataFile);
-		sendStatus.setSendPhoto(true);
-		sendStatus.setSendDetail(true);
-		session.save(sendStatus);
-		session.getTransaction().commit();
+
+	public void updateStatus(DataFile dataFile, Status status) {
+		try {
+			session = this.sessionFactory.getCurrentSession();
+			session.beginTransaction();
+			SendStatus sendStatus = new SendStatus();
+			sendStatus.setDatafile(dataFile);
+			sendStatus.setSendPhoto(true);
+			if (status.equals(Status.ONLY_PHOTOS)) {
+				sendStatus.setSendDetail(false);
+			} else {
+				sendStatus.setSendDetail(true);
+			}
+			session.save(sendStatus);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			session.getTransaction().commit();
+		}
 	}
 
 }

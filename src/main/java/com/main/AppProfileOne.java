@@ -2,13 +2,13 @@ package com.main;
 
 import com.controller.WhatsAppController;
 
-public class App {
+public class AppProfileOne {
 
 	public static void main(String[] args) {
 		WhatsAppController whatsAppController = new WhatsAppController();
 		try {
 			whatsAppController.run();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -7,12 +7,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
 @Entity
+@Table(schema = "whatsapp")
 public class SendStatus {
 	@Id
 	private Long id;
-	@ManyToOne(cascade=CascadeType.ALL)  
+	@ManyToOne(cascade=CascadeType.PERSIST)  
 	@JoinColumn(name = "id")
     @MapsId
 	private DataFile datafile;

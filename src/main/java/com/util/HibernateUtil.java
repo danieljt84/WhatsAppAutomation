@@ -11,7 +11,7 @@ public class HibernateUtil {
 	
 	private static SessionFactory buildSessionFactory() {
 		try {
-			return new Configuration().configure(new File("resources\\hibernate.cfg.xml")).buildSessionFactory();
+			return new Configuration().configure(new File("C:\\Users\\Daniel\\Documents\\backup robo\\WhatsAppAutomationProfileOne\\resources\\hibernate.cfg.xml")).buildSessionFactory();
 		}catch (Exception e) {
 			System.err.println("Initial SessionFactory creation failed." + e);
             throw new ExceptionInInitializerError(e);

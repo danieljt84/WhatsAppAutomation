@@ -17,55 +17,63 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
+
 @Entity
+@Table(name = "datafile",schema = "report")
 public class DataFile {
 	
 	@Id@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	@ManyToOne
 	private Shop shop;
-	@OneToMany(cascade=CascadeType.ALL,fetch = FetchType.EAGER)
-	@Fetch(value = FetchMode.SUBSELECT)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name="datafile_photos",
     joinColumns={@JoinColumn(name="datafile_id",
      referencedColumnName="id")},
     inverseJoinColumns={@JoinColumn(name="photos_id",
-      referencedColumnName="id")})
+      referencedColumnName="id")},schema = "report")
+	@Fetch(value = FetchMode.SUBSELECT)
 	private List<Photo> photos;
-	@OneToMany(fetch = FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name="datafile_detail_products",
+    joinColumns={@JoinColumn(name="data_file_id",
+     referencedColumnName="id")},
+    inverseJoinColumns={@JoinColumn(name="detail_products_id",
+      referencedColumnName="id")},schema = "report")
 	private List<DetailProduct> detailProducts; 
 	@ManyToOne
 	private Brand brand;
 	private LocalDate data;
 	@ManyToOne
 	private Promoter promoter;
+	@ManyToOne
 	private Project project;
+	
 	public DataFile() {
 		photos = new ArrayList<Photo>();
-		this.data = LocalDate.now();
-	}
-	public DataFile(DataFile datafile) {
-		super();
-		this.id = datafile.getId();
-		this.shop =  datafile.getShop();
-		this.photos =  datafile.getPhotos();
-		this.brand =  datafile.getBrand();
-		this.promoter =  datafile.getPromoter();
-		this.data =  datafile.getData();
-		this.detailProducts = datafile.getDetail_Products();
+		detailProducts = new ArrayList<DetailProduct>();
 	}
 	
-	public List<DetailProduct> getDetail_Products() {
-		return detailProducts;
+	
+
+	public DataFile( Shop shop, List<Photo> photos, Brand brand,
+			LocalDate data, Promoter promoter, Project project) {
+		super();
+		this.shop = shop;
+		this.photos = photos;
+		this.brand = brand;
+		this.data = data;
+		this.promoter = promoter;
+		this.project = project;
 	}
-	public void setDetail_Products(List<DetailProduct> detail_Products) {
-		this.detailProducts = detail_Products;
-	}
+
+
 
 	public List<Photo> getPhotos() {
 		return photos;
@@ -74,32 +82,15 @@ public class DataFile {
 	public void setPhotos(List<Photo> photos) {
 		this.photos = photos;
 	}
+
 	public Project getProject() {
 		return project;
 	}
+	
 	public void setProject(Project project) {
 		this.project = project;
 	}
-	//Outro set que recebe uma string 
-	public void setProject(String project) {
-	   switch(project) {
-	   case "Compartilhado Fixo":
-		   this.project = Project.FIXO_RJ;
-		   break;
-	   case "Compartilhado RJ":
-		   this.project = Project.COMPARTILHADO_RJ;
-		   break;
-	   case "Compartilhado SP":
-		   this.project = Project.COMPARTILHADO_SP;
-		   break;
-	   case "Compartilhado BA":
-		   this.project = Project.COMPARTILHADO_BA;
-		   break;
-	   case "Compartilhado ES":
-		   this.project = Project.COMPARTILHADO_ES;
-		   break;
-	   }
-	}
+
 	public Promoter getPromoter() {
 		return promoter;
 	}
@@ -136,11 +127,19 @@ public class DataFile {
 		return data;
 	}
 
+	public List<DetailProduct> getDetailProducts() {
+		return detailProducts;
+	}
+
+	public void setDetailProducts(List<DetailProduct> detailProducts) {
+		this.detailProducts = detailProducts;
+	}
+
 	public void setData(LocalDate data) {
 		this.data = data;
 	}
 	
-	//Como o Photos está em cascade, coloquei a logica de inserção nessa função
+	//Como o Photos estao em cascade, coloquei a logica de insercao nessa funcao
 	public void createPhoto(String link,String section) {
 		Photo photo = new Photo();
 		photo.setUrl(link);
@@ -160,3 +159,4 @@ public class DataFile {
 		return retorno;
 	}
 }
+
