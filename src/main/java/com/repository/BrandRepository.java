@@ -29,9 +29,9 @@ public class BrandRepository {
 		session = this.sessionFactory.getCurrentSession();
 		session.beginTransaction();
 		try {
-			String hql = "select b from Brand b";
+			String hql = "select distinct b from WhatsappGroup w inner join w.brand b order by b.id";
 			Query query = session.createQuery(hql);
-			return query.getResultList();
+			return query.setFirstResult(40).setMaxResults(40).getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

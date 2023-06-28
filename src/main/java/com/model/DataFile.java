@@ -62,9 +62,10 @@ public class DataFile {
 	
 	
 
-	public DataFile( Shop shop, List<Photo> photos, Brand brand,
+	public DataFile(Long id, Shop shop, List<Photo> photos, Brand brand,
 			LocalDate data, Promoter promoter, Project project) {
 		super();
+		this.id = id;
 		this.shop = shop;
 		this.photos = photos;
 		this.brand = brand;

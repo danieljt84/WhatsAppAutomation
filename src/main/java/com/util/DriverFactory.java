@@ -18,12 +18,15 @@ public abstract class DriverFactory {
 	
 	public DriverFactory() {
 		System.setProperty("webdriver.gecko.driver", "C:\\Users\\Daniel\\Downloads\\geckodriver-v0.33.0-win32\\geckodriver.exe");
-		//options.addArguments("--headless");
+		ProfilesIni listProfiles = new ProfilesIni();
+		FirefoxProfile profile = listProfiles.getProfile("trabalho");
 		FirefoxOptions options = new FirefoxOptions();
+		options.addArguments("--headless");
+		options.setProfile(profile);
 		options.setBinary("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
 		this.driver = new FirefoxDriver(options);
 		this.driver.manage().window();
-		this.js = (JavascriptExecutor) driver;  
+		this.js = (JavascriptExecutor) driver;   
  	}
 	
 	public WebDriver getDriver() {

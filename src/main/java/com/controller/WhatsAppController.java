@@ -13,6 +13,7 @@ import com.model.WhatsappGroup;
 import com.repository.BrandRepository;
 import com.repository.DataFileRepository;
 import com.repository.WhatsappGroupRepository;
+import com.service.ApiService;
 import com.service.WhatsappService;
 import com.util.FileReader;
 import com.util.ImageURL;
@@ -25,6 +26,7 @@ public class WhatsAppController {
 	BrandRepository brandRepository;
 	List<DataFile> datas;
 	WhatsappService whatsapp;
+	ApiService apiService;
 	FileReader reader;
 	ImageURL image;
 	List<Brand> brands;
@@ -35,7 +37,8 @@ public class WhatsAppController {
 		brandRepository = new BrandRepository();
 		dataFileRepository = new DataFileRepository();
 		groupRepository = new WhatsappGroupRepository();
-		brands = brandRepository.findAll();
+		apiService = new ApiService();
+		brands = apiService.getBrands();
 	}
 
 	// Funcao principal, que controla a execu��o da automac�o
@@ -46,7 +49,7 @@ public class WhatsAppController {
 		while (cont > 0) {
 			try {
 				for (Brand brand : brands) {
-					datas = dataFileRepository.findByBrand(brand.getId());
+					datas = apiService.getDataFileByBrand(brand.getId());
 					routine(brand);
 				}
 				// Ap�s finalizar, espera 30 segundos para realizar a rotina novamente
@@ -62,7 +65,7 @@ public class WhatsAppController {
 		// baixando as imagens
 		image = new ImageURL();
 		reader = new FileReader();
-		List<WhatsappGroup> groups = groupRepository.findAll(brand.getId());
+		List<WhatsappGroup> groups = apiService.getWhatsappGroup(brand.getId());
 
 		// Usando a logica que temos que enviar em um grupo de cada vez
 		// meu loop seguir� os grupos
@@ -88,12 +91,14 @@ public class WhatsAppController {
 				if(!whatsapp.findContact(group.getName())) continue;
 				int cont = 0;
 				for (DataFile file : files) {
+					/*
 					// Verifica se � necessario enviar o Detail
 					if (group.isSendDetail()) {
 						List<DetailProduct> details = dataFileRepository.checkLastSentDetails(file,
 								group.getDaysToSend());
 						file.setDetailProducts(details);
 					}
+					*/
 					try {
 						for (Photo photo : file.getPhotos()) {
 							if (whatsapp.sendImage(photo.getUrl()))
@@ -101,7 +106,7 @@ public class WhatsAppController {
 						}
 						if (cont > 0) {
 							Status status = whatsapp.sendInfo(file);
-							dataFileRepository.updateStatus(file, status);
+							apiService.updateSendStatus(file.getId());
 						}
 					} catch (Exception e) {
 						// Caso o site do whatsapp trave, ir� lancar uma exception e com isso reinicio o
@@ -130,7 +135,7 @@ public class WhatsAppController {
 				for (DataFile data : datas) {
 					try {
 						if (shop.getId().equals(data.getShop().getId())) {
-							filterShop.add(new DataFile(data.getShop(),data.getPhotos(),data.getBrand(),data.getData(),data.getPromoter(),data.getProject()));
+							filterShop.add(new DataFile(data.getId(), data.getShop(),data.getPhotos(),data.getBrand(),data.getData(),data.getPromoter(),data.getProject()));
 						}
 					} catch (Exception e) {
 						continue;

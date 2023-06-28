@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -14,7 +15,7 @@ import javax.persistence.Table;
 public class SendStatus {
 	@Id
 	private Long id;
-	@ManyToOne(cascade=CascadeType.PERSIST)  
+	@OneToOne
 	@JoinColumn(name = "id")
     @MapsId
 	private DataFile datafile;
